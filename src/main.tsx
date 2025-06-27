@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-import WorkflowDashboard from './WorkflowDashboard';
+import WorkflowDashboard from './components/WorkflowDashboard';
 
 const rootElement = document.getElementById('root');
 if (rootElement) {

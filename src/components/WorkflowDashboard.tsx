@@ -5,11 +5,11 @@ import type {
   Connection,
   DraggedComponent,
   ConnectionStart
-} from './types/workflowTypes';
+} from '../types/workflowTypes';
 
-import  COMPONENT_TEMPLATES  from './components/componentTemplates';
-import RenderConfigFields from './components/RenderConfigFields';
-import { getConnectionPoint } from './utils';
+import  COMPONENT_TEMPLATES  from './componentTemplates';
+import RenderConfigFields from './RenderConfigFields';
+import { getConnectionPoint } from '../utils';
 
 
 
