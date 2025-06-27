@@ -1,0 +1,75 @@
+{
+  "name": "greenfi-fe",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsc && vite",
+    "build": "tsc && vite build",
+    "build:uat": "tsc && vite build --mode uat",
+    "build:stag": "tsc && vite build --mode stag",
+    "build:prod": "tsc && vite build --mode prod",
+    "preview": "vite preview",
+    "lint": "eslint . --max-warnings 178",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
+    "deploy": "aws s3 sync dist/ s3://<YOUR_BUCKET_NAME>",
+    "uat": "npm run build:uat && npm run deploy",
+    "stag": "npm run build:stag && npm run deploy",
+    "prod": "npm run build:prod && npm run deploy"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx}": [
+      "npm run format",
+      "npm run lint"
+    ]
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ],
+    "overrides": [
+      {
+        "files": [
+          "**/*.stories.*"
+        ],
+        "rules": {
+          "import/no-anonymous-default-export": "off"
+        }
+      },
+      {
+        "files": [
+          "**/*.stories.*"
+        ],
+        "rules": {
+          "import/no-anonymous-default-export": "off"
+        }
+      }
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "dependencies": {
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.4",
+    "@vitejs/plugin-react": "^4.6.0",
+    "prettier": "^3.1.1",
+    "vite": "^4.4.5"
+  }
+}
