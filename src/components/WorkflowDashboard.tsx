@@ -7,11 +7,11 @@ import type {
   ConnectionStart
 } from '../types/workflowTypes';
 
-import  COMPONENT_TEMPLATES  from './componentTemplates';
-import RenderConfigFields from './RenderConfigFields';
+import COMPONENT_TEMPLATES from './componentTemplates';
 import { getConnectionPoint } from '../utils';
-
-
+import Sidebar from './Sidebar';
+import Canvas from './Canvas';
+import ConfigModal from './ConfigModal';
 
 const WorkflowDashboard = () => {
   const [components, setComponents] = useState<WorkflowComponent[]>([]);
@@ -188,97 +188,13 @@ const WorkflowDashboard = () => {
         >
           Workflow Dashboard
         </h1>
-
         <div style={{ display: 'flex', gap: '20px', height: '700px' }}>
           {/* Sidebar */}
-          <div style={{ width: '300px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {/* Components Panel */}
-            <div
-              style={{
-                backgroundColor: 'white',
-                borderRadius: '12px',
-                padding: '20px',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                border: '1px solid #e5e7eb'
-              }}
-            >
-              <h3
-                style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  marginBottom: '16px',
-                  color: '#374151'
-                }}
-              >
-                Components
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {Object.entries(COMPONENT_TEMPLATES).map(([key, template]) => (
-                  <div
-                    key={key}
-                    draggable
-                    onDragStart={e => handleDragStart(e, template, true)}
-                    onDragEnd={handleDragEnd}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '12px 16px',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      backgroundColor: 'white',
-                      cursor: 'grab',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      transition: 'all 0.2s',
-                      textAlign: 'left',
-                      width: '100%'
-                    }}
-                    onMouseEnter={e => {
-                      (e.target as HTMLDivElement).style.backgroundColor = '#f9fafb';
-                      (e.target as HTMLDivElement).style.transform = 'translateY(-1px)';
-                    }}
-                    onMouseLeave={e => {
-                      (e.target as HTMLDivElement).style.backgroundColor = 'white';
-                      (e.target as HTMLDivElement).style.transform = 'translateY(0)';
-                    }}
-                  >
-                    <span style={{ fontSize: '16px' }}>{template.icon}</span>
-                    <span>{template.title}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Tools Panel */}
-            <div
-              style={{
-                backgroundColor: 'white',
-                borderRadius: '12px',
-                padding: '20px',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                border: '1px solid #e5e7eb'
-              }}
-            >
-              <h3
-                style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  marginBottom: '16px',
-                  color: '#374151'
-                }}
-              >
-                Instructions
-              </h3>
-              <div style={{ fontSize: '14px', color: '#6b7280', lineHeight: '1.5' }}>
-                <p style={{ marginBottom: '8px' }}>• Drag components from above to the canvas</p>
-                <p style={{ marginBottom: '8px' }}>• Hover over components to see connection points</p>
-                <p style={{ marginBottom: '8px' }}>• Click connection points to link components</p>
-                <p>• Use gear icon to configure components</p>
-              </div>
-            </div>
-          </div>
-
+          <Sidebar
+            COMPONENT_TEMPLATES={COMPONENT_TEMPLATES}
+            handleDragStart={handleDragStart}
+            handleDragEnd={handleDragEnd}
+          />
           {/* Main Canvas */}
           <div style={{ flex: 1 }}>
             <div
@@ -291,400 +207,38 @@ const WorkflowDashboard = () => {
                 height: '100%'
               }}
             >
-              <div
-                ref={canvasRef}
-                style={{
-                  position: 'relative',
-                  height: '100%',
-                  border: '2px dashed #d1d5db',
-                  borderRadius: '8px',
-                  backgroundColor: '#fafbfc',
-                  overflow: 'hidden'
-                }}
-                onDragOver={e => e.preventDefault()}
-                onDrop={handleCanvasDrop}
-                onMouseMove={handleMouseMove}
-              >
-                {/* Render connections */}
-                <svg
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    pointerEvents: 'none',
-                    zIndex: 1
-                  }}
-                >
-                  {connections.map(connection => {
-                    const fromComponent = components.find(c => c.id === connection.from);
-                    const toComponent = components.find(c => c.id === connection.to);
-
-                    if (!fromComponent || !toComponent) return null;
-
-                    const fromPos = getConnectionPoint(fromComponent, connection.fromType);
-                    const toPos = getConnectionPoint(toComponent, connection.toType);
-
-                    return (
-                      <line
-                        key={connection.id}
-                        x1={fromPos.x}
-                        y1={fromPos.y}
-                        x2={toPos.x}
-                        y2={toPos.y}
-                        stroke="#3b82f6"
-                        strokeWidth="3"
-                        markerEnd="url(#arrowhead)"
-                      />
-                    );
-                  })}
-
-                  {/* Temporary connection line */}
-                  {tempConnection && (
-                    <line
-                      x1={tempConnection.from.x}
-                      y1={tempConnection.from.y}
-                      x2={tempConnection.to.x}
-                      y2={tempConnection.to.y}
-                      stroke="#94a3b8"
-                      strokeWidth="2"
-                      strokeDasharray="5,5"
-                    />
-                  )}
-                  <defs>
-                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                      <polygon points="0 0, 10 3.5, 0 7" fill="#3b82f6" />
-                    </marker>
-                  </defs>
-                </svg>
-
-                {/* Render components */}
-                {components.map(component => (
-                  <div
-                    key={component.id}
-                    draggable
-                    onDragStart={e => handleDragStart(e, component, false)}
-                    onDragEnd={handleDragEnd}
-                    onMouseEnter={() => setHoveredComponent(component.id)}
-                    onMouseLeave={() => setHoveredComponent(null)}
-                    style={{
-                      position: 'absolute',
-                      left: component.position.x,
-                      top: component.position.y,
-                      width: '180px',
-                      minHeight: '100px',
-                      backgroundColor: 'white',
-                      border: connectionStart?.componentId === component.id ? '3px solid #3b82f6' : '1px solid #e5e7eb',
-                      borderRadius: '12px',
-                      padding: '16px',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                      cursor: 'grab',
-                      zIndex: 2,
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    {/* Connection Points */}
-                    {(hoveredComponent === component.id || connectionStart?.componentId === component.id) && (
-                      <>
-                        {/* Left connection point (input) */}
-                        <div
-                          onClick={e => handleConnectionPointClick(component.id, 'input', e)}
-                          style={{
-                            position: 'absolute',
-                            left: '-8px',
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            width: '16px',
-                            height: '16px',
-                            backgroundColor:
-                              connectionStart?.componentId === component.id &&
-                              connectionStart?.connectionType === 'input'
-                                ? '#3b82f6'
-                                : '#10b981',
-                            borderRadius: '50%',
-                            border: '2px solid white',
-                            cursor: 'pointer',
-                            zIndex: 10,
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                          }}
-                          title="Input connection"
-                        />
-
-                        {/* Right connection point (output) */}
-                        <div
-                          onClick={e => handleConnectionPointClick(component.id, 'output', e)}
-                          style={{
-                            position: 'absolute',
-                            right: '-8px',
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            width: '16px',
-                            height: '16px',
-                            backgroundColor:
-                              connectionStart?.componentId === component.id &&
-                              connectionStart?.connectionType === 'output'
-                                ? '#3b82f6'
-                                : '#f59e0b',
-                            borderRadius: '50%',
-                            border: '2px solid white',
-                            cursor: 'pointer',
-                            zIndex: 10,
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                          }}
-                          title="Output connection"
-                        />
-
-                        {/* Top connection point */}
-                        <div
-                          onClick={e => handleConnectionPointClick(component.id, 'top', e)}
-                          style={{
-                            position: 'absolute',
-                            left: '50%',
-                            top: '-8px',
-                            transform: 'translateX(-50%)',
-                            width: '16px',
-                            height: '16px',
-                            backgroundColor:
-                              connectionStart?.componentId === component.id && connectionStart?.connectionType === 'top'
-                                ? '#3b82f6'
-                                : '#8b5cf6',
-                            borderRadius: '50%',
-                            border: '2px solid white',
-                            cursor: 'pointer',
-                            zIndex: 10,
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                          }}
-                          title="Top connection"
-                        />
-
-                        {/* Bottom connection point */}
-                        <div
-                          onClick={e => handleConnectionPointClick(component.id, 'bottom', e)}
-                          style={{
-                            position: 'absolute',
-                            left: '50%',
-                            bottom: '-8px',
-                            transform: 'translateX(-50%)',
-                            width: '16px',
-                            height: '16px',
-                            backgroundColor:
-                              connectionStart?.componentId === component.id &&
-                              connectionStart?.connectionType === 'bottom'
-                                ? '#3b82f6'
-                                : '#ef4444',
-                            borderRadius: '50%',
-                            border: '2px solid white',
-                            cursor: 'pointer',
-                            zIndex: 10,
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                          }}
-                          title="Bottom connection"
-                        />
-                      </>
-                    )}
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                        marginBottom: '12px'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '16px' }}>{component.icon}</span>
-                        <span
-                          style={{
-                            fontSize: '11px',
-                            fontWeight: '600',
-                            color: 'white',
-                            backgroundColor: component.color,
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                            textTransform: 'uppercase'
-                          }}
-                        >
-                          {component.type}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', gap: '4px' }}>
-                        <button
-                          onClick={e => {
-                            e.stopPropagation();
-                            openConfigModal(component);
-                          }}
-                          style={{
-                            padding: '4px',
-                            border: 'none',
-                            backgroundColor: 'transparent',
-                            cursor: 'pointer',
-                            borderRadius: '4px',
-                            fontSize: '14px'
-                          }}
-                          title="Configure"
-                        >
-                          ⚙️
-                        </button>
-                        <button
-                          onClick={e => {
-                            e.stopPropagation();
-                            removeComponent(component.id);
-                          }}
-                          style={{
-                            padding: '4px',
-                            border: 'none',
-                            backgroundColor: 'transparent',
-                            cursor: 'pointer',
-                            borderRadius: '4px',
-                            fontSize: '14px'
-                          }}
-                          title="Delete"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </div>
-                    <div
-                      style={{
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        marginBottom: '8px',
-                        color: '#374151'
-                      }}
-                    >
-                      {component.title}
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#6b7280', lineHeight: '1.3' }}>
-                      {Object.entries(component.config).map(([key, value]) => (
-                        <div key={key} style={{ marginBottom: '2px' }}>
-                          <strong>{key}:</strong> {value}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-
-                {components.length === 0 && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
-                      textAlign: 'center',
-                      color: '#9ca3af'
-                    }}
-                  >
-                    <div style={{ fontSize: '48px', marginBottom: '12px' }}>🎯</div>
-                    <div style={{ fontSize: '18px', fontWeight: '500' }}>
-                      Drag components here to build your workflow
-                    </div>
-                  </div>
-                )}
-              </div>
+              <Canvas
+                components={components}
+                connections={connections}
+                connectionStart={connectionStart}
+                hoveredComponent={hoveredComponent}
+                tempConnection={tempConnection}
+                canvasRef={canvasRef}
+                handleCanvasDrop={handleCanvasDrop}
+                handleMouseMove={handleMouseMove}
+                handleDragStart={handleDragStart}
+                handleDragEnd={handleDragEnd}
+                setHoveredComponent={setHoveredComponent}
+                handleConnectionPointClick={handleConnectionPointClick}
+                openConfigModal={openConfigModal}
+                removeComponent={removeComponent}
+                getConnectionPoint={getConnectionPoint}
+              />
             </div>
           </div>
         </div>
-
         {/* Configuration Modal */}
-        {configModalActive && (
-          <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 1000
-            }}
-          >
-            <div
-              style={{
-                backgroundColor: 'white',
-                borderRadius: '12px',
-                padding: '24px',
-                width: '480px',
-                maxWidth: '90vw',
-                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
-              }}
-            >
-              <h2
-                style={{
-                  fontSize: '20px',
-                  fontWeight: '700',
-                  marginBottom: '20px',
-                  color: '#111827'
-                }}
-              >
-                Configure {selectedComponent?.title}
-              </h2>
-
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>Component Title</label>
-                <input
-                  type="text"
-                  value={selectedComponent?.title || ''}
-                  onChange={e => handleTitleChange(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '6px',
-                    fontSize: '14px'
-                  }}
-                />
-              </div>
-
-              <RenderConfigFields selectedComponent={selectedComponent} handleConfigChange={handleConfigChange} />
-
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  gap: '12px',
-                  marginTop: '24px'
-                }}
-              >
-                <button
-                  onClick={() => {
-                    setConfigModalActive(false);
-                    setSelectedComponent(null);
-                  }}
-                  style={{
-                    padding: '8px 16px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '6px',
-                    backgroundColor: 'white',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: '500'
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={saveConfiguration}
-                  style={{
-                    padding: '8px 16px',
-                    border: 'none',
-                    borderRadius: '6px',
-                    backgroundColor: '#3b82f6',
-                    color: 'white',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: '500'
-                  }}
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <ConfigModal
+          selectedComponent={selectedComponent}
+          configModalActive={configModalActive}
+          handleTitleChange={handleTitleChange}
+          handleConfigChange={handleConfigChange}
+          saveConfiguration={saveConfiguration}
+          closeModal={() => {
+            setConfigModalActive(false);
+            setSelectedComponent(null);
+          }}
+        />
       </div>
     </div>
   );
