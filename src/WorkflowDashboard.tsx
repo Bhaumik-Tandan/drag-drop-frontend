@@ -11,36 +11,11 @@ import type {
   ConnectionStart
 } from './types/workflowTypes';
 
-// Component types
-const COMPONENT_TYPES = {
-  INPUT: 'input',
-  OUTPUT: 'output',
-  ACTION: 'action'
-} as const;
+import  COMPONENT_TEMPLATES  from './components/componentTemplates';
+import { COMPONENT_TYPES } from './components/componentTemplates';
 
-const COMPONENT_TEMPLATES: Record<ComponentType, Omit<WorkflowComponent, 'id' | 'position'>> = {
-  [COMPONENT_TYPES.INPUT]: {
-    title: 'Input Node',
-    type: COMPONENT_TYPES.INPUT,
-    color: '#10b981',
-    icon: '📥',
-    config: { inputType: 'text', placeholder: 'Enter value' }
-  },
-  [COMPONENT_TYPES.OUTPUT]: {
-    title: 'Output Node',
-    type: COMPONENT_TYPES.OUTPUT,
-    color: '#3b82f6',
-    icon: '📤',
-    config: { outputFormat: 'json' }
-  },
-  [COMPONENT_TYPES.ACTION]: {
-    title: 'Action Node',
-    type: COMPONENT_TYPES.ACTION,
-    color: '#f59e0b',
-    icon: '⚡',
-    config: { actionType: 'transform', delay: 0 }
-  }
-};
+
+
 
 const WorkflowDashboard = () => {
   const [components, setComponents] = useState<WorkflowComponent[]>([]);

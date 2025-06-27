@@ -1,7 +1,8 @@
 // Component types
-declare const COMPONENT_TYPES: {
-  readonly INPUT: 'input';
-  readonly OUTPUT: 'output';
-  readonly ACTION: 'action';
-};
+export const COMPONENT_TYPES = {
+  INPUT: 'input',
+  OUTPUT: 'output',
+  ACTION: 'action'
+} as const;
+
 export type ComponentType = typeof COMPONENT_TYPES[keyof typeof COMPONENT_TYPES];
