@@ -168,6 +168,20 @@ const WorkflowDashboard = () => {
     setSelectedComponent(prev => prev ? ({ ...prev, title: value }) : null);
   };
 
+  // Function to download workflow data as JSON
+  const downloadWorkflowData = () => {
+    const data = JSON.stringify({ components, connections }, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'workflowData.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div
       style={{
@@ -188,6 +202,21 @@ const WorkflowDashboard = () => {
         >
           Workflow Dashboard
         </h1>
+        <button
+          onClick={downloadWorkflowData}
+          style={{
+            marginBottom: '16px',
+            padding: '8px 16px',
+            background: '#2563eb',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontWeight: 600
+          }}
+        >
+          Save Workflow
+        </button>
         <div style={{ display: 'flex', gap: '20px', height: '700px' }}>
           {/* Sidebar */}
           <Sidebar

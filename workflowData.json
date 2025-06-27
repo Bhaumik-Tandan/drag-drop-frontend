@@ -1,33 +1,42 @@
 {
   "components": [
     {
-      "id": "3ttogva15",
-      "title": "Input Node",
-      "type": "input",
-      "color": "#10b981",
-      "icon": "📥",
-      "position": {
-        "x": 120,
-        "y": 123.0625
-      },
-      "config": {
-        "inputType": "text",
-        "placeholder": "Enter value"
-      }
-    },
-    {
-      "id": "ujujbnj37",
+      "id": "cy2ffd2xu",
       "title": "Output Node",
       "type": "output",
       "color": "#3b82f6",
       "icon": "📤",
       "position": {
-        "x": 604,
-        "y": 291.0625
+        "x": 249,
+        "y": 123.5625
       },
       "config": {
         "outputFormat": "json"
       }
+    },
+    {
+      "id": "3cmdwezi9",
+      "title": "Action Node",
+      "type": "action",
+      "color": "#f59e0b",
+      "icon": "⚡",
+      "position": {
+        "x": 392,
+        "y": 335.5625
+      },
+      "config": {
+        "actionType": "transform",
+        "delay": 0
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "c36w5lbja",
+      "from": "cy2ffd2xu",
+      "fromType": "bottom",
+      "to": "3cmdwezi9",
+      "toType": "top"
     }
   ]
 }
