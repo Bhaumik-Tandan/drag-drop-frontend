@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import WorkflowDashboard from './components/WorkflowDashboard';
 import Login from './components/Login';
 import Register from './components/Register';
+import WorkflowList from './components/WorkflowList';
 
 const RequireAuth = ({ children }: { children: JSX.Element }) => {
   const location = useLocation();
@@ -15,6 +16,7 @@ const RequireAuth = ({ children }: { children: JSX.Element }) => {
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+  const [selectedWorkflow, setSelectedWorkflow] = useState<any>(null);
 
   useEffect(() => {
     setIsLoggedIn(!!localStorage.getItem('token'));
@@ -26,6 +28,25 @@ const App = () => {
         <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
         <Route path="/register" element={<Register />} />
         <Route
+          path="/workflows"
+          element={
+            <RequireAuth>
+              <WorkflowList onSelect={(wf) => {
+                setSelectedWorkflow(wf);
+                window.location.href = `/workflow/${wf.id}`;
+              }} />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/workflow/:id"
+          element={
+            <RequireAuth>
+              <WorkflowDashboard selectedWorkflow={selectedWorkflow} />
+            </RequireAuth>
+          }
+        />
+        <Route
           path="/workflow"
           element={
             <RequireAuth>
@@ -33,7 +54,7 @@ const App = () => {
             </RequireAuth>
           }
         />
-        <Route path="*" element={<Navigate to={isLoggedIn ? '/workflow' : '/login'} replace />} />
+        <Route path="*" element={<Navigate to={isLoggedIn ? '/workflows' : '/login'} replace />} />
       </Routes>
     </Router>
   );

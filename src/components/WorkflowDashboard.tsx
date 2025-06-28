@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import type {
   ComponentConfig,
   WorkflowComponent,
@@ -14,7 +15,9 @@ import Canvas from './Canvas';
 import ConfigModal from './ConfigModal';
 import JSONWORFLOW from '../../workflowData.json';
 
-const WorkflowDashboard = () => {
+const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [components, setComponents] = useState<WorkflowComponent[]>([]);
   const [connections, setConnections] = useState<Connection[]>([]);
   const [selectedComponent, setSelectedComponent] = useState<WorkflowComponent | null>(null);
@@ -28,21 +31,26 @@ const WorkflowDashboard = () => {
   // Generate unique ID
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
+  // Load workflow if id or selectedWorkflow changes
   useEffect(() => {
-    if (JSONWORFLOW && JSONWORFLOW.components && JSONWORFLOW.connections) {
-      setComponents(JSONWORFLOW.components as WorkflowComponent[]);
-      setConnections(JSONWORFLOW.connections);
-    } else {
-      // Initialize with default components if no data is provided
-      const initialComponents: WorkflowComponent[] = Object.values(COMPONENT_TEMPLATES).map((template: any) => ({
-        ...template,
-        id: generateId(),
-        position: { x: 0, y: 0 }
-      }));
-      setComponents(initialComponents);
-    }
-  }, []);
-
+    const fetchWorkflow = async () => {
+      if (id) {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/workflows/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setComponents(data.components || []);
+          setConnections(data.connections || []);
+        }
+      } else if (selectedWorkflow) {
+        setComponents(selectedWorkflow.components || []);
+        setConnections(selectedWorkflow.connections || []);
+      }
+    };
+    fetchWorkflow();
+  }, [id, selectedWorkflow]);
 
   // Remove component
   const removeComponent = useCallback((id: string) => {
@@ -202,6 +210,33 @@ const WorkflowDashboard = () => {
     URL.revokeObjectURL(url);
   };
 
+  // Save workflow to backend
+  const saveWorkflowToBackend = async () => {
+    const token = localStorage.getItem('token');
+    const body = JSON.stringify({ components, connections });
+    const method = id ? 'PUT' : 'POST';
+    const url = id
+      ? `${import.meta.env.VITE_API_URL}/workflows/${id}`
+      : `${import.meta.env.VITE_API_URL}/workflows`;
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body,
+    });
+    if (res.ok) {
+      if (!id) {
+        const data = await res.json();
+        navigate(`/workflow/${data.id}`);
+      }
+      alert('Workflow saved!');
+    } else {
+      alert('Failed to save workflow');
+    }
+  };
+
   return (
     <div
       style={{
@@ -223,7 +258,7 @@ const WorkflowDashboard = () => {
           Workflow Dashboard
         </h1>
         <button
-          onClick={downloadWorkflowData}
+          onClick={saveWorkflowToBackend}
           style={{
             marginBottom: '16px',
             padding: '8px 16px',
