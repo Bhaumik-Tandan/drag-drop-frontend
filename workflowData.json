@@ -28,6 +28,21 @@
         "actionType": "transform",
         "delay": 0
       }
+    },
+    {
+      "id": "uqp0ih1px",
+      "title": "Action Node",
+      "type": "action",
+      "color": "#f59e0b",
+      "icon": "⚡",
+      "position": {
+        "x": 713,
+        "y": 124.0625
+      },
+      "config": {
+        "actionType": "transform",
+        "delay": 0
+      }
     }
   ],
   "connections": [
@@ -37,6 +52,13 @@
       "fromType": "bottom",
       "to": "3cmdwezi9",
       "toType": "top"
+    },
+    {
+      "id": "zmeog15cz",
+      "from": "uqp0ih1px",
+      "fromType": "input",
+      "to": "3cmdwezi9",
+      "toType": "output"
     }
   ]
 }

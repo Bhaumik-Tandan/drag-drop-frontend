@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type {
   ComponentConfig,
   WorkflowComponent,
@@ -12,6 +12,7 @@ import { getConnectionPoint } from '../utils';
 import Sidebar from './Sidebar';
 import Canvas from './Canvas';
 import ConfigModal from './ConfigModal';
+import JSONWORFLOW from '../../workflowData.json';
 
 const WorkflowDashboard = () => {
   const [components, setComponents] = useState<WorkflowComponent[]>([]);
@@ -26,6 +27,21 @@ const WorkflowDashboard = () => {
 
   // Generate unique ID
   const generateId = () => Math.random().toString(36).substr(2, 9);
+
+  useEffect(() => {
+    if (JSONWORFLOW && JSONWORFLOW.components && JSONWORFLOW.connections) {
+      setComponents(JSONWORFLOW.components as WorkflowComponent[]);
+      setConnections(JSONWORFLOW.connections);
+    } else {
+      // Initialize with default components if no data is provided
+      const initialComponents: WorkflowComponent[] = Object.values(COMPONENT_TEMPLATES).map((template: any) => ({
+        ...template,
+        id: generateId(),
+        position: { x: 0, y: 0 }
+      }));
+      setComponents(initialComponents);
+    }
+  }, []);
 
 
   // Remove component
