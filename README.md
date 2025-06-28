@@ -56,7 +56,7 @@ Before you begin, ensure you have the following installed:
 3. **Set up environment variables**
    Create a `.env` file in the root directory:
    ```env
-   VITE_API_URL=http://localhost:3000/api
+   VITE_API_URL=http://localhost:3000
    ```
 
 4. **Start the development server**
@@ -65,9 +65,6 @@ Before you begin, ensure you have the following installed:
    # or
    yarn dev
    ```
-
-5. **Open your browser**
-   Navigate to `http://localhost:5173` to view the application
 
 ## 🏗️ Project Structure
 
@@ -165,48 +162,5 @@ The application is fully responsive and works on:
 - **Tablet**: Optimized layout with collapsible navigation
 - **Mobile**: Touch-friendly interface with mobile-optimized components
 
-## 🎯 Key Improvements Made
-
-### UI/UX Enhancements
-1. **Removed Full Name Requirement**: Simplified registration process
-2. **Enhanced Visual Design**: Modern gradients and improved styling
-3. **Better Button States**: Loading states and proper disabled states
-4. **Improved Navigation**: Top bar with user email display
-5. **No Browser Alerts**: Clean notification system using Polaris Banners
-
-### Technical Improvements
-1. **User Email Display**: Shows actual user email in top navigation
-2. **Enhanced Form Validation**: Real-time validation with helpful messages
-3. **Better Error Handling**: User-friendly error messages
-4. **Improved Loading States**: Proper loading indicators
-5. **Modern Styling**: Gradient backgrounds and enhanced visual appeal
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🆘 Support
-
-If you encounter any issues or have questions:
-1. Check the existing issues in the repository
-2. Create a new issue with detailed information
-3. Contact the development team
-
-## 🔄 Updates
-
-Stay updated with the latest changes:
-- Follow the repository for updates
-- Check the changelog for version history
-- Review release notes for new features
-
----
 
 **Built with ❤️ using React, TypeScript, and Shopify Polaris** 
