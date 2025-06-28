@@ -143,12 +143,7 @@ const App = () => {
                         content: 'Workflows',
                         onAction: () => window.location.href = '/workflows',
                       }}
-                      primaryAction={{
-                        content: 'Save',
-                        onAction: () => {
-                          // Save workflow logic here
-                        },
-                      }}
+                  
                     >
                       <WorkflowDashboard selectedWorkflow={selectedWorkflow} />
                     </Page>
@@ -164,12 +159,6 @@ const App = () => {
                       backAction={{
                         content: 'Workflows',
                         onAction: () => window.location.href = '/workflows',
-                      }}
-                      primaryAction={{
-                        content: 'Save',
-                        onAction: () => {
-                          // Save workflow logic here
-                        },
                       }}
                     >
                       <WorkflowDashboard />
