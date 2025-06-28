@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import type {
   ComponentConfig,
@@ -28,6 +28,9 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
   const [tempConnection, setTempConnection] = useState<{ from: { x: number; y: number }; to: { x: number; y: number } } | null>(null);
   const [workflowName, setWorkflowName] = useState(selectedWorkflow?.name || '');
   const [showNameModal, setShowNameModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
 
   // Generate unique ID
@@ -37,6 +40,7 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
   useEffect(() => {
     const fetchWorkflow = async () => {
       if (id) {
+        setLoading(true);
         const token = localStorage.getItem('token');
         const res = await fetch(`${import.meta.env.VITE_API_URL}/workflows/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -45,13 +49,17 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
           const data = await res.json();
           setComponents(data.components || []);
           setConnections(data.connections || []);
+          setWorkflowName(data.name || '');
         }
+        setLoading(false);
       } else if (selectedWorkflow) {
         setComponents(selectedWorkflow.components || []);
         setConnections(selectedWorkflow.connections || []);
+        setWorkflowName(selectedWorkflow.name || '');
       }
     };
     fetchWorkflow();
+    // eslint-disable-next-line
   }, [id, selectedWorkflow]);
 
   // Remove component
@@ -214,6 +222,7 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
 
   // Save workflow to backend
   const saveWorkflowToBackend = async (name?: string) => {
+    setLoading(true);
     const token = localStorage.getItem('token');
     const workflowNameToSend = name || workflowName;
     const body = JSON.stringify({ name: workflowNameToSend, components, connections });
@@ -229,6 +238,7 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
       },
       body,
     });
+    setLoading(false);
     if (res.ok) {
       if (!id) {
         const data = await res.json();
@@ -237,6 +247,43 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
       alert('Workflow saved!');
     } else {
       alert('Failed to save workflow');
+    }
+  };
+
+  // Inline name update
+  const handleNameBlur = async () => {
+    setEditingName(false);
+    if (id) {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      await fetch(`${import.meta.env.VITE_API_URL}/workflows/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name: workflowName }),
+      });
+      setLoading(false);
+    }
+  };
+
+  // Delete workflow
+  const handleDelete = async () => {
+    if (!id) return;
+    if (!window.confirm('Are you sure you want to delete this workflow?')) return;
+    setLoading(true);
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/workflows/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setLoading(false);
+    if (res.ok) {
+      alert('Workflow deleted');
+      navigate('/workflows');
+    } else {
+      alert('Failed to delete workflow');
     }
   };
 
@@ -259,17 +306,45 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
         padding: '20px'
       }}
     >
-      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-        <h1
-          style={{
-            fontSize: '32px',
-            fontWeight: '700',
-            marginBottom: '24px',
-            color: '#111827'
-          }}
-        >
-          Workflow Dashboard
-        </h1>
+      <div style={{ maxWidth: '1400px', margin: '0 auto', position: 'relative' }}>
+        {loading && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            background: 'rgba(255,255,255,0.6)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <div style={{ padding: 32, background: 'white', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', fontSize: 20, fontWeight: 600 }}>
+              Loading...
+            </div>
+          </div>
+        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
+          {editingName ? (
+            <input
+              ref={nameInputRef}
+              value={workflowName}
+              onChange={e => setWorkflowName(e.target.value)}
+              onBlur={handleNameBlur}
+              autoFocus
+              style={{ fontSize: 28, fontWeight: 700, border: '1px solid #e5e7eb', borderRadius: 6, padding: 6, minWidth: 200 }}
+            />
+          ) : (
+            <h1
+              style={{ fontSize: '32px', fontWeight: '700', color: '#111827', margin: 0, cursor: 'pointer' }}
+              onClick={() => setEditingName(true)}
+              title="Click to edit name"
+            >
+              {workflowName || 'Workflow Dashboard'}
+            </h1>
+          )}
+          {id && (
+            <button
+              onClick={handleDelete}
+              style={{ marginLeft: 12, padding: '8px 16px', background: '#ef4444', color: 'white', border: 'none', borderRadius: 6, fontWeight: 600, cursor: 'pointer' }}
+            >
+              Delete
+            </button>
+          )}
+        </div>
         <button
           onClick={handleSaveClick}
           style={{
