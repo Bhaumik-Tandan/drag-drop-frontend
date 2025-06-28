@@ -26,6 +26,8 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
   const [connectionStart, setConnectionStart] = useState<ConnectionStart | null>(null);
   const [hoveredComponent, setHoveredComponent] = useState<string | null>(null);
   const [tempConnection, setTempConnection] = useState<{ from: { x: number; y: number }; to: { x: number; y: number } } | null>(null);
+  const [workflowName, setWorkflowName] = useState(selectedWorkflow?.name || '');
+  const [showNameModal, setShowNameModal] = useState(false);
   const canvasRef = useRef<HTMLDivElement | null>(null);
 
   // Generate unique ID
@@ -211,9 +213,10 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
   };
 
   // Save workflow to backend
-  const saveWorkflowToBackend = async () => {
+  const saveWorkflowToBackend = async (name?: string) => {
     const token = localStorage.getItem('token');
-    const body = JSON.stringify({ components, connections });
+    const workflowNameToSend = name || workflowName;
+    const body = JSON.stringify({ name: workflowNameToSend, components, connections });
     const method = id ? 'PUT' : 'POST';
     const url = id
       ? `${import.meta.env.VITE_API_URL}/workflows/${id}`
@@ -237,6 +240,16 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
     }
   };
 
+  const handleSaveClick = () => {
+    setShowNameModal(true);
+  };
+
+  const handleNameSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowNameModal(false);
+    saveWorkflowToBackend(workflowName);
+  };
+
   return (
     <div
       style={{
@@ -258,7 +271,7 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
           Workflow Dashboard
         </h1>
         <button
-          onClick={saveWorkflowToBackend}
+          onClick={handleSaveClick}
           style={{
             marginBottom: '16px',
             padding: '8px 16px',
@@ -272,6 +285,28 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
         >
           Save Workflow
         </button>
+        {showNameModal && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
+          }}>
+            <form onSubmit={handleNameSubmit} style={{ background: 'white', padding: 32, borderRadius: 12, minWidth: 320, boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>
+              <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Workflow Name</h3>
+              <input
+                type="text"
+                value={workflowName}
+                onChange={e => setWorkflowName(e.target.value)}
+                required
+                style={{ width: '100%', padding: 8, marginBottom: 16, borderRadius: 6, border: '1px solid #e5e7eb' }}
+                placeholder="Enter workflow name"
+              />
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+                <button type="button" onClick={() => setShowNameModal(false)} style={{ padding: '8px 16px', borderRadius: 6, border: 'none', background: '#e5e7eb', fontWeight: 600 }}>Cancel</button>
+                <button type="submit" style={{ padding: '8px 16px', borderRadius: 6, border: 'none', background: '#2563eb', color: 'white', fontWeight: 600 }}>Save</button>
+              </div>
+            </form>
+          </div>
+        )}
         <div style={{ display: 'flex', gap: '20px', height: '700px' }}>
           {/* Sidebar */}
           <Sidebar
