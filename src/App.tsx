@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AppProvider, Button, Frame, Page } from '@shopify/polaris';
+import { AppProvider, Button, Frame, Page, TopBar, Navigation } from '@shopify/polaris';
 import '@shopify/polaris/build/esm/styles.css';
 import WorkflowDashboard from './components/WorkflowDashboard';
 import Login from './components/Login';
@@ -19,15 +19,21 @@ const RequireAuth = ({ children }: { children: JSX.Element }) => {
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
   const [selectedWorkflow, setSelectedWorkflow] = useState<any>(null);
+  const [userMenuActive, setUserMenuActive] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>('');
 
   const handleLogout = () => {
     localStorage.clear();
     setIsLoggedIn(false);
+    setUserEmail('');
     window.location.href = '/login';
   };
 
   useEffect(() => {
-    setIsLoggedIn(!!localStorage.getItem('token'));
+    const token = localStorage.getItem('token');
+    const email = localStorage.getItem('userEmail');
+    setIsLoggedIn(!!token);
+    setUserEmail(email || '');
   }, []);
 
   const i18n = {
@@ -38,52 +44,141 @@ const App = () => {
     },
   };
 
+  const userMenuActions = [
+    {
+      items: [
+        {
+          content: 'Workflows',
+          onAction: () => window.location.href = '/workflows',
+        },
+        {
+          content: 'New Workflow',
+          onAction: () => window.location.href = '/workflow',
+        },
+      ],
+    },
+    {
+      items: [
+        {
+          content: 'Logout',
+          onAction: handleLogout,
+          destructive: true,
+        },
+      ],
+    },
+  ];
+
+  const topBarMarkup = (
+    <TopBar
+      showNavigationToggle
+      userMenu={
+        <TopBar.UserMenu
+          actions={userMenuActions}
+          name={userEmail || 'User'}
+          detail="Workflow Builder"
+          initials={userEmail ? userEmail.charAt(0).toUpperCase() : 'U'}
+          open={userMenuActive}
+          onToggle={() => setUserMenuActive(!userMenuActive)}
+        />
+      }
+    />
+  );
+
+  const navigationMarkup = (
+    <Navigation location="/">
+      <Navigation.Section
+        items={[
+          {
+            label: 'Workflows',
+            icon: 'list',
+            onClick: () => window.location.href = '/workflows',
+          },
+          {
+            label: 'New Workflow',
+            icon: 'plus',
+            onClick: () => window.location.href = '/workflow',
+          },
+        ]}
+      />
+    </Navigation>
+  );
+
   return (
     <AppProvider i18n={i18n}>
       <Router>
         {isLoggedIn ? (
-          <Frame>
-            <Page
-              title="Workflow Builder"
-              primaryAction={{
-                content: 'Logout',
-                onAction: handleLogout,
-                destructive: true,
-              }}
-            >
-              <Routes>
-                <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
-                <Route path="/register" element={<Register />} />
-                <Route
-                  path="/workflows"
-                  element={
-                    <RequireAuth>
+          <Frame
+            topBar={topBarMarkup}
+            navigation={navigationMarkup}
+          >
+            <Routes>
+              <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
+              <Route path="/register" element={<Register />} />
+              <Route
+                path="/workflows"
+                element={
+                  <RequireAuth>
+                    <Page
+                      title="Workflows"
+                      primaryAction={{
+                        content: 'New Workflow',
+                        onAction: () => window.location.href = '/workflow',
+                      }}
+                    >
                       <WorkflowList onSelect={(wf) => {
                         setSelectedWorkflow(wf);
                         window.location.href = `/workflow/${wf.id}`;
                       }} />
-                    </RequireAuth>
-                  }
-                />
-                <Route
-                  path="/workflow/:id"
-                  element={
-                    <RequireAuth>
+                    </Page>
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/workflow/:id"
+                element={
+                  <RequireAuth>
+                    <Page
+                      title={selectedWorkflow?.name || 'Workflow'}
+                      backAction={{
+                        content: 'Workflows',
+                        onAction: () => window.location.href = '/workflows',
+                      }}
+                      primaryAction={{
+                        content: 'Save',
+                        onAction: () => {
+                          // Save workflow logic here
+                        },
+                      }}
+                    >
                       <WorkflowDashboard selectedWorkflow={selectedWorkflow} />
-                    </RequireAuth>
-                  }
-                />
-                <Route
-                  path="/workflow"
-                  element={
-                    <RequireAuth>
+                    </Page>
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/workflow"
+                element={
+                  <RequireAuth>
+                    <Page
+                      title="New Workflow"
+                      backAction={{
+                        content: 'Workflows',
+                        onAction: () => window.location.href = '/workflows',
+                      }}
+                      primaryAction={{
+                        content: 'Save',
+                        onAction: () => {
+                          // Save workflow logic here
+                        },
+                      }}
+                    >
                       <WorkflowDashboard />
-                    </RequireAuth>
-                  }
-                />
-                <Route path="*" element={<Navigate to={isLoggedIn ? '/workflows' : '/login'} replace />} />
-              </Routes>
-            </Page>
+                    </Page>
+                  </RequireAuth>
+                }
+              />
+              <Route path="*" element={<Navigate to={isLoggedIn ? '/workflows' : '/login'} replace />} />
+            </Routes>
           </Frame>
         ) : (
           <Routes>

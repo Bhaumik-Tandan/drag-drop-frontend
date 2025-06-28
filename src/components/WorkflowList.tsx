@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, Banner, Spinner, EmptyState } from '@shopify/polaris';
+import { 
+  Card, 
+  Button, 
+  Banner, 
+  Spinner, 
+  EmptyState,
+  Text,
+  Badge,
+  Icon,
+  ButtonGroup
+} from '@shopify/polaris';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -39,41 +49,32 @@ const WorkflowList = ({ onSelect }: { onSelect: (workflow: any) => void }) => {
         alignItems: 'center', 
         minHeight: '400px' 
       }}>
-        <Spinner size="large" />
+        <div style={{ textAlign: 'center' }}>
+          <Spinner size="large" />
+          <p style={{ 
+            marginTop: 'var(--p-space-4)', 
+            color: 'var(--p-text-subdued)' 
+          }}>
+            Loading your workflows...
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', padding: 'var(--p-space-6)' }}>
+    <div style={{ maxWidth: 1000, margin: '0 auto', padding: 'var(--p-space-6)' }}>
       <Card>
         <div style={{ padding: 'var(--p-space-6)' }}>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            marginBottom: 'var(--p-space-6)' 
-          }}>
-            <h1 style={{ 
-              fontSize: 'var(--p-font-size-7)', 
-              fontWeight: 'var(--p-font-weight-bold)',
-              margin: 0,
-              color: 'var(--p-text)'
-            }}>
-              Your Workflows
-            </h1>
-            <Button
-              variant="primary"
-              onClick={() => navigate('/workflow')}
-            >
-              New Workflow
-            </Button>
-          </div>
-
           {error && (
-            <Banner tone="critical" onDismiss={() => setError(null)}>
-              {error}
-            </Banner>
+            <div style={{ marginBottom: 'var(--p-space-6)' }}>
+              <Banner 
+                tone="critical" 
+                onDismiss={() => setError(null)}
+              >
+                <p>{error}</p>
+              </Banner>
+            </div>
           )}
 
           {workflows.length === 0 && !loading ? (
@@ -85,34 +86,70 @@ const WorkflowList = ({ onSelect }: { onSelect: (workflow: any) => void }) => {
               <Button
                 variant="primary"
                 onClick={() => navigate('/workflow')}
+                size="large"
               >
-                Create Workflow
+                Create Your First Workflow
               </Button>
             </EmptyState>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--p-space-2)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--p-space-3)' }}>
               {workflows.map((workflow) => (
-                <div key={workflow.id} style={{ 
-                  border: '1px solid var(--p-border-subdued)',
-                  borderRadius: 'var(--p-border-radius-2)',
-                  padding: 'var(--p-space-3)',
-                  cursor: 'pointer'
-                }}>
-                  <Button
-                    variant="plain"
+                <Card key={workflow.id}>
+                  <div style={{ padding: 'var(--p-space-4)' }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center',
+                      cursor: 'pointer'
+                    }}
                     onClick={() => onSelect(workflow)}
-                    fullWidth
-                  >
-                    {workflow.name || `Workflow #${workflow.id}`}
-                  </Button>
-                  <div style={{ 
-                    marginTop: 'var(--p-space-2)',
-                    color: 'var(--p-text-subdued)',
-                    fontSize: 'var(--p-font-size-2)'
-                  }}>
-                    {new Date(workflow.created_at || Date.now()).toLocaleDateString()}
+                    >
+                      <div style={{ flex: 1 }}>
+                        <div style={{ marginBottom: 'var(--p-space-2)' }}>
+                          <Text variant="headingMd" as="h3" fontWeight="semibold">
+                            {workflow.name || `Workflow #${workflow.id}`}
+                          </Text>
+                        </div>
+                        <div style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 'var(--p-space-3)'
+                        }}>
+                          <p style={{ 
+                            color: 'var(--p-text-subdued)',
+                            margin: 0,
+                            fontSize: 'var(--p-font-size-2)'
+                          }}>
+                            Created {new Date(workflow.created_at || Date.now()).toLocaleDateString()}
+                          </p>
+                          {workflow.status && (
+                            <Badge tone={workflow.status === 'active' ? 'success' : 'info'}>
+                              {workflow.status}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div style={{ marginLeft: 'var(--p-space-4)' }}>
+                        <ButtonGroup>
+                          <Button
+                            variant="primary"
+                            onClick={() => onSelect(workflow)}
+                          >
+                            Open
+                          </Button>
+                          <Button
+                            variant="plain"
+                            onClick={() => {
+                              // Add edit functionality here
+                            }}
+                          >
+                            Edit
+                          </Button>
+                        </ButtonGroup>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           )}
