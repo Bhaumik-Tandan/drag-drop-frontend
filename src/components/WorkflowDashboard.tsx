@@ -167,6 +167,10 @@ const WorkflowDashboard = () => {
   const saveConfiguration = () => {
     if (selectedComponent) {
       updateComponentConfig(selectedComponent.id, selectedComponent.config);
+      // Update the title as well
+      setComponents(prev => prev.map(comp =>
+        comp.id === selectedComponent.id ? { ...comp, title: selectedComponent.title } : comp
+      ));
     }
     setConfigModalActive(false);
     setSelectedComponent(null);

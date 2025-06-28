@@ -2,7 +2,7 @@
   "components": [
     {
       "id": "cy2ffd2xu",
-      "title": "Output Node",
+      "title": "Output",
       "type": "output",
       "color": "#3b82f6",
       "icon": "📤",
