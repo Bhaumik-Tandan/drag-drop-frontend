@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AppProvider, Button, Frame, Page } from '@shopify/polaris';
+import '@shopify/polaris/build/esm/styles.css';
 import WorkflowDashboard from './components/WorkflowDashboard';
 import Login from './components/Login';
 import Register from './components/Register';
@@ -28,51 +30,70 @@ const App = () => {
     setIsLoggedIn(!!localStorage.getItem('token'));
   }, []);
 
+  const i18n = {
+    Polaris: {
+      Common: {
+        checkbox: 'checkbox',
+      },
+    },
+  };
+
   return (
-    <Router>
-      {isLoggedIn && (
-        <div style={{ position: 'fixed', top: 20, right: 30, zIndex: 1000 }}>
-          <button
-            onClick={handleLogout}
-            style={{ padding: '8px 16px', background: '#ef4444', color: 'white', border: 'none', borderRadius: 6, fontWeight: 600, cursor: 'pointer' }}
-          >
-            Logout
-          </button>
-        </div>
-      )}
-      <Routes>
-        <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
-        <Route path="/register" element={<Register />} />
-        <Route
-          path="/workflows"
-          element={
-            <RequireAuth>
-              <WorkflowList onSelect={(wf) => {
-                setSelectedWorkflow(wf);
-                window.location.href = `/workflow/${wf.id}`;
-              }} />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/workflow/:id"
-          element={
-            <RequireAuth>
-              <WorkflowDashboard selectedWorkflow={selectedWorkflow} />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/workflow"
-          element={
-            <RequireAuth>
-              <WorkflowDashboard />
-            </RequireAuth>
-          }
-        />
-        <Route path="*" element={<Navigate to={isLoggedIn ? '/workflows' : '/login'} replace />} />
-      </Routes>
-    </Router>
+    <AppProvider i18n={i18n}>
+      <Router>
+        {isLoggedIn ? (
+          <Frame>
+            <Page
+              title="Workflow Builder"
+              primaryAction={{
+                content: 'Logout',
+                onAction: handleLogout,
+                destructive: true,
+              }}
+            >
+              <Routes>
+                <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
+                <Route path="/register" element={<Register />} />
+                <Route
+                  path="/workflows"
+                  element={
+                    <RequireAuth>
+                      <WorkflowList onSelect={(wf) => {
+                        setSelectedWorkflow(wf);
+                        window.location.href = `/workflow/${wf.id}`;
+                      }} />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/workflow/:id"
+                  element={
+                    <RequireAuth>
+                      <WorkflowDashboard selectedWorkflow={selectedWorkflow} />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/workflow"
+                  element={
+                    <RequireAuth>
+                      <WorkflowDashboard />
+                    </RequireAuth>
+                  }
+                />
+                <Route path="*" element={<Navigate to={isLoggedIn ? '/workflows' : '/login'} replace />} />
+              </Routes>
+            </Page>
+          </Frame>
+        ) : (
+          <Routes>
+            <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        )}
+      </Router>
+    </AppProvider>
   );
 };
 

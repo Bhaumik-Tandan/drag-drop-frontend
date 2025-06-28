@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { register as registerApi } from '../utils/apiHelper';
 import { useNavigate, Link } from 'react-router-dom';
+import { Card, FormLayout, TextField, Button, Banner } from '@shopify/polaris';
 
 const Register = () => {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -8,12 +9,11 @@ const Register = () => {
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (value: string, id: string) => {
+    setForm({ ...form, [id]: value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setError(null);
     try {
       await registerApi(form.email, form.password);
@@ -25,38 +25,99 @@ const Register = () => {
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: '100px auto', background: 'white', padding: 32, borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-      <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 16 }}>Sign Up</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          required
-          style={{ width: '100%', padding: 8, marginBottom: 12, borderRadius: 6, border: '1px solid #e5e7eb' }}
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          required
-          style={{ width: '100%', padding: 8, marginBottom: 12, borderRadius: 6, border: '1px solid #e5e7eb' }}
-        />
-        {error && <div style={{ color: 'red', marginBottom: 8 }}>{error}</div>}
-        {success && <div style={{ color: 'green', marginBottom: 8 }}>Registration successful! Redirecting...</div>}
-        <button
-          type="submit"
-          style={{ width: '100%', padding: 10, background: '#2563eb', color: 'white', border: 'none', borderRadius: 6, fontWeight: 600 }}
-        >
-          Sign Up
-        </button>
-      </form>
-      <div style={{ marginTop: 12, textAlign: 'center' }}>
-        Already have an account? <Link to="/login">Login</Link>
+    <div style={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      minHeight: '100vh',
+      background: 'var(--p-surface)'
+    }}>
+      <div style={{ width: '100%', maxWidth: 400 }}>
+        <Card>
+          <div style={{ padding: 'var(--p-space-8)' }}>
+            <div style={{ textAlign: 'center', marginBottom: 'var(--p-space-6)' }}>
+              <h1 style={{ 
+                fontSize: 'var(--p-font-size-7)', 
+                fontWeight: 'var(--p-font-weight-bold)',
+                margin: 0,
+                color: 'var(--p-text)'
+              }}>
+                Create Account
+              </h1>
+              <p style={{ 
+                color: 'var(--p-text-subdued)', 
+                marginTop: 'var(--p-space-2)',
+                marginBottom: 0
+              }}>
+                Join us to start building workflows
+              </p>
+            </div>
+
+            {error && (
+              <Banner tone="critical" onDismiss={() => setError(null)}>
+                {error}
+              </Banner>
+            )}
+
+            {success && (
+              <Banner tone="success">
+                Registration successful! Redirecting...
+              </Banner>
+            )}
+
+            <FormLayout>
+              <TextField
+                label="Email"
+                type="email"
+                value={form.email}
+                onChange={handleChange}
+                id="email"
+                autoComplete="email"
+              />
+              <TextField
+                label="Password"
+                type="password"
+                value={form.password}
+                onChange={handleChange}
+                id="password"
+                autoComplete="new-password"
+              />
+              <Button
+                variant="primary"
+                fullWidth
+                onClick={handleSubmit}
+                disabled={!form.email || !form.password || success}
+              >
+                Sign Up
+              </Button>
+            </FormLayout>
+
+            <div style={{ 
+              marginTop: 'var(--p-space-6)', 
+              textAlign: 'center',
+              paddingTop: 'var(--p-space-4)',
+              borderTop: '1px solid var(--p-border-subdued)'
+            }}>
+              <p style={{ 
+                color: 'var(--p-text-subdued)', 
+                margin: 0,
+                fontSize: 'var(--p-font-size-3)'
+              }}>
+                Already have an account?{' '}
+                <Link 
+                  to="/login" 
+                  style={{ 
+                    color: 'var(--p-action-primary)', 
+                    textDecoration: 'none',
+                    fontWeight: 'var(--p-font-weight-semibold)'
+                  }}
+                >
+                  Sign In
+                </Link>
+              </p>
+            </div>
+          </div>
+        </Card>
       </div>
     </div>
   );
