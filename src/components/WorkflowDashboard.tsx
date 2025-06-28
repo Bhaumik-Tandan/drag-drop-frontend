@@ -288,7 +288,11 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
   };
 
   const handleSaveClick = () => {
-    setShowNameModal(true);
+    if (id) {
+      saveWorkflowToBackend();
+    } else {
+      setShowNameModal(true);
+    }
   };
 
   const handleNameSubmit = (e: React.FormEvent) => {
