@@ -13,7 +13,6 @@ import { getConnectionPoint } from '../utils';
 import Sidebar from './Sidebar';
 import Canvas from './Canvas';
 import ConfigModal from './ConfigModal';
-import JSONWORFLOW from '../../workflowData.json';
 
 const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => {
   const { id } = useParams();
