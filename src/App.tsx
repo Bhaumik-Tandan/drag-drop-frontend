@@ -84,24 +84,7 @@ const App = () => {
     />
   );
 
-  const navigationMarkup = (
-    <Navigation location="/">
-      <Navigation.Section
-        items={[
-          {
-            label: 'Workflows',
-            icon: 'list',
-            onClick: () => window.location.href = '/workflows',
-          },
-          {
-            label: 'New Workflow',
-            icon: 'plus',
-            onClick: () => window.location.href = '/workflow',
-          },
-        ]}
-      />
-    </Navigation>
-  );
+ 
 
   return (
     <AppProvider i18n={i18n}>
@@ -109,7 +92,6 @@ const App = () => {
         {isLoggedIn ? (
           <Frame
             topBar={topBarMarkup}
-            navigation={navigationMarkup}
           >
             <Routes>
               <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
