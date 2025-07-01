@@ -352,22 +352,22 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
               Delete
             </button>
           )}
+          <button
+            onClick={handleSaveClick}
+            style={{
+              marginLeft: 12,
+              padding: '8px 16px',
+              background: '#2563eb',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: 600
+            }}
+          >
+            Save Workflow
+          </button>
         </div>
-        <button
-          onClick={handleSaveClick}
-          style={{
-            marginBottom: '16px',
-            padding: '8px 16px',
-            background: '#2563eb',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontWeight: 600
-          }}
-        >
-          Save Workflow
-        </button>
         {showNameModal && (
           <div style={{
             position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
