@@ -125,7 +125,7 @@ const App = () => {
                         content: 'Workflows',
                         onAction: () => window.location.href = '/workflows',
                       }}
-                  
+                      fullWidth
                     >
                       <WorkflowDashboard selectedWorkflow={selectedWorkflow} />
                     </Page>
@@ -142,6 +142,7 @@ const App = () => {
                         content: 'Workflows',
                         onAction: () => window.location.href = '/workflows',
                       }}
+                      fullWidth
                     >
                       <WorkflowDashboard />
                     </Page>

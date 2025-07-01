@@ -314,7 +314,7 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
         padding: '20px'
       }}
     >
-      <div style={{ maxWidth: '1400px', margin: '0 auto', position: 'relative' }}>
+      <div style={{ width: '100%', position: 'relative' }}>
         {loading && (
           <div style={{
             position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
