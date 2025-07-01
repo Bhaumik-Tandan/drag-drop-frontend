@@ -29,8 +29,25 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
   const [showNameModal, setShowNameModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editingName, setEditingName] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileDevice = window.innerWidth <= 768;
+      setIsMobile(isMobileDevice);
+      if (!isMobileDevice) {
+        setSidebarOpen(false);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Generate unique ID
   const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -198,26 +215,35 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
     setSelectedComponent(null);
   };
 
-  // Handle config input changes
+  // Handle config change
   const handleConfigChange = (field: string, value: any) => {
-    setSelectedComponent(prev => prev ? ({
-      ...prev,
-      config: { ...prev.config, [field]: value }
-    }) : null);
+    if (selectedComponent) {
+      setSelectedComponent({
+        ...selectedComponent,
+        config: { ...selectedComponent.config, [field]: value }
+      });
+    }
   };
 
+  // Handle title change
   const handleTitleChange = (value: string) => {
-    setSelectedComponent(prev => prev ? ({ ...prev, title: value }) : null);
+    if (selectedComponent) {
+      setSelectedComponent({ ...selectedComponent, title: value });
+    }
   };
 
-  // Function to download workflow data as JSON
+  // Download workflow data
   const downloadWorkflowData = () => {
-    const data = JSON.stringify({ components, connections }, null, 2);
-    const blob = new Blob([data], { type: 'application/json' });
+    const data = {
+      name: workflowName,
+      components,
+      connections
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'workflowData.json';
+    a.download = `${workflowName || 'workflow'}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -228,27 +254,31 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
   const saveWorkflowToBackend = async (name?: string) => {
     setLoading(true);
     const token = localStorage.getItem('token');
-    const workflowNameToSend = name || workflowName;
-    const body = JSON.stringify({ name: workflowNameToSend, components, connections });
+    const workflowData = {
+      name: name || workflowName,
+      components,
+      connections
+    };
+
+    const url = id ? `${import.meta.env.VITE_API_URL}/workflows/${id}` : `${import.meta.env.VITE_API_URL}/workflows`;
     const method = id ? 'PUT' : 'POST';
-    const url = id
-      ? `${import.meta.env.VITE_API_URL}/workflows/${id}`
-      : `${import.meta.env.VITE_API_URL}/workflows`;
+
     const res = await fetch(url, {
       method,
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body,
+      body: JSON.stringify(workflowData),
     });
+
     setLoading(false);
     if (res.ok) {
+      const data = await res.json();
       if (!id) {
-        const data = await res.json();
         navigate(`/workflow/${data.id}`);
       }
-      alert('Workflow saved!');
+      alert('Workflow saved successfully');
     } else {
       alert('Failed to save workflow');
     }
@@ -305,15 +335,86 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
     saveWorkflowToBackend(workflowName);
   };
 
+  // Responsive styles
+  const containerStyles = {
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    backgroundColor: '#f9fafb',
+    minHeight: '100vh',
+    padding: isMobile ? '10px' : '20px',
+  };
+
+  const headerStyles: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: isMobile ? '8px' : '16px',
+    marginBottom: isMobile ? '16px' : '24px',
+    flexWrap: isMobile ? 'wrap' : 'nowrap',
+  };
+
+  const titleStyles = {
+    fontSize: isMobile ? '24px' : '32px',
+    fontWeight: '700' as const,
+    color: '#111827',
+    margin: 0,
+    cursor: 'pointer',
+    flex: isMobile ? '1 1 100%' : '0 0 auto',
+  };
+
+  const buttonStyles = {
+    padding: isMobile ? '6px 12px' : '8px 16px',
+    background: '#2563eb',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    fontWeight: '600' as const,
+    fontSize: isMobile ? '12px' : '14px',
+  };
+
+  const deleteButtonStyles = {
+    ...buttonStyles,
+    background: '#ef4444',
+    marginLeft: isMobile ? '8px' : '12px',
+  };
+
+  const sidebarToggleStyles = {
+    ...buttonStyles,
+    background: '#6b7280',
+    marginBottom: isMobile ? '12px' : '0',
+    display: isMobile ? 'block' : 'none',
+    width: '100%',
+  };
+
+  const mainLayoutStyles: React.CSSProperties = {
+    display: 'flex',
+    gap: isMobile ? '12px' : '20px',
+    height: isMobile ? '500px' : '700px',
+    flexDirection: isMobile ? 'column' : 'row',
+  };
+
+  const sidebarContainerStyles = {
+    width: isMobile ? '100%' : '300px',
+    display: isMobile ? (sidebarOpen ? 'block' : 'none') : 'flex',
+    flexDirection: 'column' as const,
+    gap: isMobile ? '12px' : '16px',
+  };
+
+  const canvasContainerStyles = {
+    flex: 1,
+    minHeight: isMobile ? '400px' : 'auto',
+  };
+
+  const canvasWrapperStyles = {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    padding: isMobile ? '12px' : '20px',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+    border: '1px solid #e5e7eb',
+    height: '100%',
+  };
+
   return (
-    <div
-      style={{
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        backgroundColor: '#f9fafb',
-        minHeight: '100vh',
-        padding: '20px'
-      }}
-    >
+    <div style={containerStyles}>
       <div style={{ width: '100%', position: 'relative' }}>
         {loading && (
           <div style={{
@@ -325,7 +426,8 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
             </div>
           </div>
         )}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
+        
+        <div style={headerStyles}>
           {editingName ? (
             <input
               ref={nameInputRef}
@@ -333,48 +435,66 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
               onChange={e => setWorkflowName(e.target.value)}
               onBlur={handleNameBlur}
               autoFocus
-              style={{ fontSize: 28, fontWeight: 700, border: '1px solid #e5e7eb', borderRadius: 6, padding: 6, minWidth: 200 }}
+              style={{ 
+                fontSize: isMobile ? 20 : 28, 
+                fontWeight: 700, 
+                border: '1px solid #e5e7eb', 
+                borderRadius: 6, 
+                padding: 6, 
+                minWidth: isMobile ? 150 : 200,
+                flex: isMobile ? '1 1 100%' : '0 0 auto',
+              }}
             />
           ) : (
             <h1
-              style={{ fontSize: '32px', fontWeight: '700', color: '#111827', margin: 0, cursor: 'pointer' }}
+              style={titleStyles}
               onClick={() => setEditingName(true)}
               title="Click to edit name"
             >
               {workflowName || 'Workflow Dashboard'}
             </h1>
           )}
+          
+          {isMobile && (
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              style={sidebarToggleStyles}
+            >
+              {sidebarOpen ? 'Hide Components' : 'Show Components'}
+            </button>
+          )}
+          
           {id && (
             <button
               onClick={handleDelete}
-              style={{ marginLeft: 12, padding: '8px 16px', background: '#ef4444', color: 'white', border: 'none', borderRadius: 6, fontWeight: 600, cursor: 'pointer' }}
+              style={deleteButtonStyles}
             >
               Delete
             </button>
           )}
+          
           <button
             onClick={handleSaveClick}
-            style={{
-              marginLeft: 12,
-              padding: '8px 16px',
-              background: '#2563eb',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontWeight: 600
-            }}
+            style={buttonStyles}
           >
             Save Workflow
           </button>
         </div>
+
         {showNameModal && (
           <div style={{
             position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
             background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
           }}>
-            <form onSubmit={handleNameSubmit} style={{ background: 'white', padding: 32, borderRadius: 12, minWidth: 320, boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>
-              <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Workflow Name</h3>
+            <form onSubmit={handleNameSubmit} style={{ 
+              background: 'white', 
+              padding: isMobile ? 20 : 32, 
+              borderRadius: 12, 
+              minWidth: isMobile ? 280 : 320, 
+              boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+              margin: isMobile ? '20px' : '0',
+            }}>
+              <h3 style={{ fontSize: isMobile ? 16 : 20, fontWeight: 700, marginBottom: 16 }}>Workflow Name</h3>
               <input
                 type="text"
                 value={workflowName}
@@ -390,25 +510,21 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
             </form>
           </div>
         )}
-        <div style={{ display: 'flex', gap: '20px', height: '700px' }}>
+
+        <div style={mainLayoutStyles}>
           {/* Sidebar */}
-          <Sidebar
-            COMPONENT_TEMPLATES={COMPONENT_TEMPLATES}
-            handleDragStart={handleDragStart}
-            handleDragEnd={handleDragEnd}
-          />
+          <div style={sidebarContainerStyles}>
+            <Sidebar
+              COMPONENT_TEMPLATES={COMPONENT_TEMPLATES}
+              handleDragStart={handleDragStart}
+              handleDragEnd={handleDragEnd}
+              isMobile={isMobile}
+            />
+          </div>
+          
           {/* Main Canvas */}
-          <div style={{ flex: 1 }}>
-            <div
-              style={{
-                backgroundColor: 'white',
-                borderRadius: '12px',
-                padding: '20px',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                border: '1px solid #e5e7eb',
-                height: '100%'
-              }}
-            >
+          <div style={canvasContainerStyles}>
+            <div style={canvasWrapperStyles}>
               <Canvas
                 components={components}
                 connections={connections}
@@ -431,6 +547,7 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
             </div>
           </div>
         </div>
+
         {/* Configuration Modal */}
         <ConfigModal
           selectedComponent={selectedComponent}
@@ -442,6 +559,7 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
             setConfigModalActive(false);
             setSelectedComponent(null);
           }}
+          isMobile={isMobile}
         />
       </div>
     </div>

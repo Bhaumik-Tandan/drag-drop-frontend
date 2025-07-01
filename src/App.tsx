@@ -21,6 +21,7 @@ const App = () => {
   const [selectedWorkflow, setSelectedWorkflow] = useState<any>(null);
   const [userMenuActive, setUserMenuActive] = useState(false);
   const [userEmail, setUserEmail] = useState<string>('');
+  const [isMobile, setIsMobile] = useState(false);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -34,6 +35,18 @@ const App = () => {
     const email = localStorage.getItem('userEmail');
     setIsLoggedIn(!!token);
     setUserEmail(email || '');
+  }, []);
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileDevice = window.innerWidth <= 768;
+      setIsMobile(isMobileDevice);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const i18n = {
@@ -78,16 +91,17 @@ const App = () => {
             color: '#fff',
             background: 'transparent',
             border: 'none',
-            fontSize: '18px',
+            fontSize: isMobile ? '16px' : '18px',
             fontWeight: 500,
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            padding: '8px 20px',
+            padding: isMobile ? '6px 16px' : '8px 20px',
             borderRadius: '24px',
             cursor: 'pointer',
             transition: 'background 0.2s, color 0.2s',
             outline: 'none',
+            minHeight: isMobile ? '36px' : 'auto',
           }}
           onMouseOver={e => ((e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.08)')}
           onMouseOut={e => ((e.currentTarget as HTMLButtonElement).style.background = 'transparent')}

@@ -10,6 +10,7 @@ interface ConfigModalProps {
   handleConfigChange: (field: string, value: any) => void;
   saveConfiguration: () => void;
   closeModal: () => void;
+  isMobile?: boolean;
 }
 
 const ConfigModal: React.FC<ConfigModalProps> = ({
@@ -18,7 +19,8 @@ const ConfigModal: React.FC<ConfigModalProps> = ({
   handleTitleChange,
   handleConfigChange,
   saveConfiguration,
-  closeModal
+  closeModal,
+  isMobile = false
 }) => {
   if (!configModalActive || !selectedComponent) return null;
   
@@ -47,7 +49,10 @@ const ConfigModal: React.FC<ConfigModalProps> = ({
             autoComplete="off"
           />
         </div>
-        <RenderConfigFields selectedComponent={selectedComponent} handleConfigChange={handleConfigChange} />
+        <RenderConfigFields 
+          selectedComponent={selectedComponent} 
+          handleConfigChange={handleConfigChange}
+        />
       </Modal.Section>
     </Modal>
   );
