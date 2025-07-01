@@ -71,6 +71,30 @@ const App = () => {
   const topBarMarkup = (
     <TopBar
       showNavigationToggle
+      contextControl={
+        <button
+          onClick={() => window.location.href = '/'}
+          style={{
+            color: '#fff',
+            background: 'transparent',
+            border: 'none',
+            fontSize: '18px',
+            fontWeight: 500,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 20px',
+            borderRadius: '24px',
+            cursor: 'pointer',
+            transition: 'background 0.2s, color 0.2s',
+            outline: 'none',
+          }}
+          onMouseOver={e => ((e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.08)')}
+          onMouseOut={e => ((e.currentTarget as HTMLButtonElement).style.background = 'transparent')}
+        >
+          <span>Home</span>
+        </button>
+      }
       userMenu={
         <TopBar.UserMenu
           actions={userMenuActions}
@@ -120,11 +144,6 @@ const App = () => {
                 element={
                   <RequireAuth>
                     <Page
-                      title={selectedWorkflow?.name || 'Workflow'}
-                      backAction={{
-                        content: 'Workflows',
-                        onAction: () => window.location.href = '/workflows',
-                      }}
                       fullWidth
                     >
                       <WorkflowDashboard selectedWorkflow={selectedWorkflow} />
