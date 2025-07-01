@@ -33,6 +33,8 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
+  const [notification, setNotification] = useState<string | null>(null);
+  const [showNotification, setShowNotification] = useState(false);
 
   // Detect mobile device
   useEffect(() => {
@@ -278,7 +280,10 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
       if (!id) {
         navigate(`/workflow/${data.id}`);
       }
-      alert('Workflow saved successfully');
+      setNotification('Workflow saved successfully');
+      setShowNotification(true);
+      setTimeout(() => setShowNotification(false), 2200);
+      setTimeout(() => setNotification(null), 2500);
     } else {
       alert('Failed to save workflow');
     }
@@ -415,6 +420,33 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
 
   return (
     <div style={containerStyles}>
+      {/* Improved Notification Toast */}
+      {notification && (
+        <div style={{
+          position: 'fixed',
+          top: 28,
+          right: 28,
+          minWidth: 220,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          background: 'rgba(34,197,94,0.97)', // green-500 with opacity
+          color: 'white',
+          padding: '10px 20px',
+          borderRadius: 12,
+          boxShadow: '0 4px 16px rgba(0,0,0,0.13)',
+          fontWeight: 500,
+          fontSize: 15,
+          opacity: showNotification ? 1 : 0,
+          transition: 'opacity 0.4s',
+          zIndex: 4000,
+        }}>
+          <span style={{fontSize: 20, display: 'flex', alignItems: 'center'}}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="10" fill="#fff" fillOpacity="0.18"/><path d="M6 10.5L9 13.5L14 8.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </span>
+          <span>{notification}</span>
+        </div>
+      )}
       <div style={{ width: '100%', position: 'relative' }}>
         {loading && (
           <div style={{
