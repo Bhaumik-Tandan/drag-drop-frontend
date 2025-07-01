@@ -426,6 +426,7 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
                 removeComponent={removeComponent}
                 removeConnection={removeConnection}
                 getConnectionPoint={getConnectionPoint}
+                updateComponentPosition={updateComponentPosition}
               />
             </div>
           </div>
