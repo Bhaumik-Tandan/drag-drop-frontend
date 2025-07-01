@@ -18,6 +18,7 @@ interface CanvasProps {
   handleConnectionPointClick: (componentId: string, connectionType: string, event: React.MouseEvent<HTMLDivElement>) => void;
   openConfigModal: (component: WorkflowComponent) => void;
   removeComponent: (id: string) => void;
+  removeConnection: (connectionId: string) => void;
   getConnectionPoint: (component: WorkflowComponent, type: string) => { x: number; y: number };
 }
 
@@ -36,6 +37,7 @@ const Canvas: React.FC<CanvasProps> = ({
   handleConnectionPointClick,
   openConfigModal,
   removeComponent,
+  removeConnection,
   getConnectionPoint
 }) => (
   <div
@@ -50,6 +52,7 @@ const Canvas: React.FC<CanvasProps> = ({
       connections={connections}
       tempConnection={tempConnection}
       getConnectionPoint={getConnectionPoint}
+      removeConnection={removeConnection}
     />
     {components.map(component => (
       <ComponentCard

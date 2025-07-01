@@ -67,6 +67,11 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
     setConnections(prev => prev.filter(conn => conn.from !== id && conn.to !== id));
   }, []);
 
+  // Remove connection
+  const removeConnection = useCallback((connectionId: string) => {
+    setConnections(prev => prev.filter(conn => conn.id !== connectionId));
+  }, []);
+
   // Update component position
   const updateComponentPosition = useCallback((id: string, position: { x: number; y: number }) => {
     setComponents(prev => prev.map(comp => (comp.id === id ? { ...comp, position } : comp)));
@@ -419,6 +424,7 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
                 handleConnectionPointClick={handleConnectionPointClick}
                 openConfigModal={openConfigModal}
                 removeComponent={removeComponent}
+                removeConnection={removeConnection}
                 getConnectionPoint={getConnectionPoint}
               />
             </div>
