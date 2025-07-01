@@ -9,8 +9,11 @@ import {
   Text,
   Badge,
   Icon,
-  ButtonGroup
+  ButtonGroup,
+  Modal
 } from '@shopify/polaris';
+
+
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -18,6 +21,9 @@ const WorkflowList = ({ onSelect }: { onSelect: (workflow: any) => void }) => {
   const [workflows, setWorkflows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteModalActive, setDeleteModalActive] = useState(false);
+  const [workflowToDelete, setWorkflowToDelete] = useState<any>(null);
+  const [deleting, setDeleting] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,6 +46,41 @@ const WorkflowList = ({ onSelect }: { onSelect: (workflow: any) => void }) => {
     };
     fetchWorkflows();
   }, []);
+
+  const handleDeleteClick = (workflow: any) => {
+    setWorkflowToDelete(workflow);
+    setDeleteModalActive(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!workflowToDelete) return;
+    
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_URL}/workflows/${workflowToDelete.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      if (res.ok) {
+        setWorkflows(prev => prev.filter(w => w.id !== workflowToDelete.id));
+        setDeleteModalActive(false);
+        setWorkflowToDelete(null);
+      } else {
+        throw new Error('Failed to delete workflow');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error deleting workflow');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalActive(false);
+    setWorkflowToDelete(null);
+  };
 
   if (loading) {
     return (
@@ -129,21 +170,20 @@ const WorkflowList = ({ onSelect }: { onSelect: (workflow: any) => void }) => {
                           )}
                         </div>
                       </div>
-                      <div style={{ marginLeft: 'var(--p-space-4)' }}>
+                      <div 
+                        style={{ marginLeft: 'var(--p-space-4)' }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteClick(workflow);
+                        }}
+                      >
                         <ButtonGroup>
                           <Button
-                            variant="primary"
-                            onClick={() => onSelect(workflow)}
-                          >
-                            Open
-                          </Button>
-                          <Button
                             variant="plain"
-                            onClick={() => {
-                              // Add edit functionality here
-                            }}
+                            tone="critical"
+                            accessibilityLabel="Delete workflow"
                           >
-                            Edit
+                            ✕
                           </Button>
                         </ButtonGroup>
                       </div>
@@ -153,6 +193,32 @@ const WorkflowList = ({ onSelect }: { onSelect: (workflow: any) => void }) => {
               ))}
             </div>
           )}
+
+          {/* Delete Confirmation Modal */}
+          <Modal
+            open={deleteModalActive}
+            onClose={handleDeleteCancel}
+            title="Delete Workflow"
+            primaryAction={{
+              content: deleting ? 'Deleting...' : 'Delete',
+              destructive: true,
+              onAction: handleDeleteConfirm,
+              loading: deleting,
+            }}
+            secondaryActions={[
+              {
+                content: 'Cancel',
+                onAction: handleDeleteCancel,
+              },
+            ]}
+          >
+            <Modal.Section>
+              <p>
+                Are you sure you want to delete "{workflowToDelete?.name || `Workflow #${workflowToDelete?.id}`}"? 
+                This action cannot be undone.
+              </p>
+            </Modal.Section>
+          </Modal>
         </div>
       </Card>
     </div>
