@@ -13,6 +13,7 @@ import { getConnectionPoint } from '../utils';
 import Sidebar from './Sidebar';
 import Canvas from './Canvas';
 import ConfigModal from './ConfigModal';
+import { Modal } from '@shopify/polaris';
 
 const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => {
   const { id } = useParams();
@@ -35,6 +36,7 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
   const [showNotification, setShowNotification] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Detect mobile device
   useEffect(() => {
@@ -310,7 +312,7 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
   // Delete workflow
   const handleDelete = async () => {
     if (!id) return;
-    if (!window.confirm('Are you sure you want to delete this workflow?')) return;
+    setShowDeleteModal(false);
     setLoading(true);
     const token = localStorage.getItem('token');
     const res = await fetch(`${import.meta.env.VITE_API_URL}/workflows/${id}`, {
@@ -319,10 +321,16 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
     });
     setLoading(false);
     if (res.ok) {
-      alert('Workflow deleted');
+      setNotification('Workflow deleted');
+      setShowNotification(true);
+      setTimeout(() => setShowNotification(false), 2200);
+      setTimeout(() => setNotification(null), 2500);
       navigate('/workflows');
     } else {
-      alert('Failed to delete workflow');
+      setNotification('Failed to delete workflow');
+      setShowNotification(true);
+      setTimeout(() => setShowNotification(false), 2200);
+      setTimeout(() => setNotification(null), 2500);
     }
   };
 
@@ -498,7 +506,7 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
           
           {id && (
             <button
-              onClick={handleDelete}
+              onClick={() => setShowDeleteModal(true)}
               style={deleteButtonStyles}
             >
               Delete
@@ -542,6 +550,31 @@ const WorkflowDashboard = ({ selectedWorkflow }: { selectedWorkflow?: any }) => 
             </form>
           </div>
         )}
+
+        {/* Delete Confirmation Modal */}
+        <Modal
+          open={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          title="Delete Workflow"
+          primaryAction={{
+            content: loading ? 'Deleting...' : 'Delete',
+            destructive: true,
+            onAction: handleDelete,
+            loading: loading,
+          }}
+          secondaryActions={[
+            {
+              content: 'Cancel',
+              onAction: () => setShowDeleteModal(false),
+            },
+          ]}
+        >
+          <Modal.Section>
+            <p>
+              Are you sure you want to delete "{workflowName || 'this workflow'}"? This action cannot be undone.
+            </p>
+          </Modal.Section>
+        </Modal>
 
         <div style={mainLayoutStyles}>
           {/* Sidebar */}
